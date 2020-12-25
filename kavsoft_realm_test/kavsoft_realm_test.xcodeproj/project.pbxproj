@@ -15,6 +15,7 @@
 		87ABE2B42595C4F100560A95 /* kavsoft_realm_testUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABE2B32595C4F100560A95 /* kavsoft_realm_testUITests.swift */; };
 		87ABE2C62595C78200560A95 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 87ABE2C52595C78200560A95 /* Realm */; };
 		87ABE2C82595C78200560A95 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 87ABE2C72595C78200560A95 /* RealmSwift */; };
+		87ABE2CE25961B1200560A95 /* SwiftUIRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 87ABE2CD25961B1200560A95 /* SwiftUIRefresh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				87ABE2CE25961B1200560A95 /* SwiftUIRefresh in Frameworks */,
 				87ABE2C82595C78200560A95 /* RealmSwift in Frameworks */,
 				87ABE2C62595C78200560A95 /* Realm in Frameworks */,
 			);
@@ -153,6 +155,7 @@
 			packageProductDependencies = (
 				87ABE2C52595C78200560A95 /* Realm */,
 				87ABE2C72595C78200560A95 /* RealmSwift */,
+				87ABE2CD25961B1200560A95 /* SwiftUIRefresh */,
 			);
 			productName = kavsoft_realm_test;
 			productReference = 87ABE2932595C4EC00560A95 /* kavsoft_realm_test.app */;
@@ -227,6 +230,7 @@
 			mainGroup = 87ABE28A2595C4EC00560A95;
 			packageReferences = (
 				87ABE2C42595C78200560A95 /* XCRemoteSwiftPackageReference "realm-cocoa" */,
+				87ABE2CC25961B1200560A95 /* XCRemoteSwiftPackageReference "SwiftUIRefresh" */,
 			);
 			productRefGroup = 87ABE2942595C4EC00560A95 /* Products */;
 			projectDirPath = "";
@@ -601,6 +605,14 @@
 				minimumVersion = 10.5.0;
 			};
 		};
+		87ABE2CC25961B1200560A95 /* XCRemoteSwiftPackageReference "SwiftUIRefresh" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUIRefresh";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -613,6 +625,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 87ABE2C42595C78200560A95 /* XCRemoteSwiftPackageReference "realm-cocoa" */;
 			productName = RealmSwift;
+		};
+		87ABE2CD25961B1200560A95 /* SwiftUIRefresh */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 87ABE2CC25961B1200560A95 /* XCRemoteSwiftPackageReference "SwiftUIRefresh" */;
+			productName = SwiftUIRefresh;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
