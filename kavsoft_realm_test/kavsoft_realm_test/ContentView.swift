@@ -6,7 +6,9 @@
 //
 //Realmとかを入れるときは「File」の「SwiftPackages」の「Add Package Depen...」から以下のURLを貼り付ける
 //Realmは https://github.com/realm/realm-cocoa
-//
+//更新と削除した時にAlertの表示ができなかった
+//削除した時にホームに戻りたい
+//ビューごとにまとめてたりしてないからとてつもなく見にくい
 
 import SwiftUI
 import RealmSwift
@@ -21,38 +23,46 @@ struct ContentView: View {
     @ObservedObject private var viewModel = get_data()
 
     var body: some View {
+        TabView{
         NavigationView{
             //ホーム画面にリスト表示する
             List {
-                ForEach(viewModel.itemEntities, id: \.id) { datatypes in
+                //freeze()を追加したら削除ができるっぽい https://software.small-desk.com/development/2020/09/07/swiftuirealmxcode12-realm-edit/を参照
+                ForEach(viewModel.itemEntities.freeze(), id: \.id) { datatypes in
                     //リストをタップで遷移する画面
                     NavigationLink(destination:
                                     VStack{
-                                    Text("編集画面")
-                                    Text("名前：" + "\(datatypes.name)")
+                                    Text("編集画面").padding(40)
+                                    Text("登録した名前：「 " + "\(datatypes.name)" + " 」")
                                     TextField("名前の変更", text: $name).textFieldStyle(RoundedBorderTextFieldStyle())
-                                    Text("年齢：" + "\(datatypes.age)")
+                                    Text("登録した年齢：「 " + "\(datatypes.age)" + " 」")
                                     TextField("年齢の変更", text: $age).textFieldStyle(RoundedBorderTextFieldStyle())
-                                    Text("日付：" + "\(datatypes.day)")
+                                    Text("登録した日付：「 " + "\(datatypes.day)" + " 」")
                                     DatePicker("新しい日付を選択", selection: $day, displayedComponents: .date)
                                         //要素の変更編ボタン
                                         Button(action: {
                                             let config = Realm.Configuration(schemaVersion :1)
                                             do{
                                                 let realm = try Realm(configuration: config)
+                                                let result = realm.objects(datatype.self)
                                                 try realm.write({
-                                                    datatypes.name = self.name
-                                                    datatypes.age = self.age
-                                                    datatypes.day = self.day
-                                                    realm.add(datatypes)
+                                                    //繰り返しと条件一致での方法しか考えられなかった
+                                                    for i in result{
+                                                        if i.id == datatypes.id{
+                                                            i.name = self.name
+                                                            i.age = self.age
+                                                            i.day = self.day
+                                                            realm.add(i)
+                                                        }
+                                                    }
                                                     print("success")
-                                                    //アラートのフラグ
-                                                    self.updateAlert = true
                                                     //変更したあとnameとageに残っているデータを初期値に戻す
                                                     self.name = ""
                                                     self.age = ""
                                                     self.day = Date()
                                                 })
+                                                //アラートのフラグ
+                                                //self.updateAlert = true
                                                 
                                             }
                                             catch{
@@ -61,14 +71,31 @@ struct ContentView: View {
                                             
                                             }) {
                                             Text("更新")
-                                            }.alert(isPresented: $updateAlert) {
-                                                Alert(title: Text("更新完了"),
-                                                      message: Text("内容の更新がされました"))   // 詳細メッセージの追加
+                                            }.padding(20)
+                                        //ここに削除ボタンを設置
+                                        Button(action: {
+                                            let config = Realm.Configuration(schemaVersion :1)
+                                            do{
+                                                let realm = try Realm(configuration: config)
+                                                let result = realm.objects(datatype.self)
+                                                try! realm.write({
+                                                    //コピーではなくrealmの本体を消したい
+                                                    //全データからidの一致で削除
+                                                    for i in result{
+                                                        if i.id == datatypes.id{
+                                                            realm.delete(i)
+                                                        }}
+                                                    })
                                             }
-                                        //ここに削除ボタンを設置したい
-                                        //削除するとエラーが出る最後のリストのみ正常に削除できる
-                                        //Frozen Objectとやらを使うとできるらしい
+                                            catch{
+                                                print(error.localizedDescription)
+                                            }
+                                            
+                                            }) {
+                                            Text("削除")
+                                            }.padding(20)
                                         
+
                                     }.padding(20)
                     ){
                     //↑までは遷移画面の描写
@@ -164,8 +191,19 @@ struct ContentView: View {
                 }.padding(20)){
                         Text("追加")
                 })//BarItemsの終わりのカッコ
+            //１つ目のタブ
+        }.tabItem {
+            Image(systemName: "house")
+            Text("Home")}
+            //２つ目のタブのビューの描写
+                Text("検索")
+                //２つ目のタブ
+                    .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Search")}
         }
     }
+    
 }
 
 
