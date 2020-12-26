@@ -15,9 +15,11 @@ struct ContentView: View {
     @State var name = ""
     @State var age = ""
     @State var day = Date()
+    @State private var updateAlert = false
+    @State private var newAlert = false
+    @State private var deleteAlert = false
     @ObservedObject private var viewModel = get_data()
 
-    
     var body: some View {
         NavigationView{
             //ホーム画面にリスト表示する
@@ -44,6 +46,12 @@ struct ContentView: View {
                                                     datatypes.day = self.day
                                                     realm.add(datatypes)
                                                     print("success")
+                                                    //アラートのフラグ
+                                                    self.updateAlert = true
+                                                    //変更したあとnameとageに残っているデータを初期値に戻す
+                                                    self.name = ""
+                                                    self.age = ""
+                                                    self.day = Date()
                                                 })
                                                 
                                             }
@@ -53,7 +61,14 @@ struct ContentView: View {
                                             
                                             }) {
                                             Text("更新")
+                                            }.alert(isPresented: $updateAlert) {
+                                                Alert(title: Text("更新完了"),
+                                                      message: Text("内容の更新がされました"))   // 詳細メッセージの追加
                                             }
+                                        //ここに削除ボタンを設置したい
+                                        //削除するとエラーが出る最後のリストのみ正常に削除できる
+                                        //Frozen Objectとやらを使うとできるらしい
+                                        
                                     }.padding(20)
                     ){
                     //↑までは遷移画面の描写
@@ -89,6 +104,12 @@ struct ContentView: View {
                                             try realm.write({
                                                 realm.add(newdata)
                                                 print("success")
+                                                //アラートのフラグ
+                                                self.newAlert = true
+                                                //変更したあとnameとageに残っているデータを初期値に戻す
+                                                self.name = ""
+                                                self.age = ""
+                                                self.day = Date()
                                             })
                                             
                                         }
@@ -97,7 +118,10 @@ struct ContentView: View {
                                         }
                                         
                                     }) {
-                                        Text("保存")
+                                        Text("追加")
+                                    }.alert(isPresented: $newAlert) {
+                                        Alert(title: Text("追加完了"),
+                                              message: Text("内容が追加されました"))   // 詳細メッセージの追加
                                     }
                                     
                                 //デバッグエリアに保存したものを表示する
