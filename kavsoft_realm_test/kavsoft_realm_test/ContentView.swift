@@ -14,22 +14,64 @@ import RealmSwift
 struct ContentView: View {
     @State var name = ""
     @State var age = ""
+    @State var day = Date()
     @ObservedObject private var viewModel = get_data()
+
     
     var body: some View {
         NavigationView{
-            //ホーム画面に表示する
+            //ホーム画面にリスト表示する
             List {
-                ForEach(viewModel.itemEntities, id: \.id) { datatype in
-                    Text("\(datatype.name)" + "　" + "\(datatype.age)")
-                }}
+                ForEach(viewModel.itemEntities, id: \.id) { datatypes in
+                    //リストをタップで遷移する画面
+                    NavigationLink(destination:
+                                    VStack{
+                                    Text("編集画面")
+                                    Text("名前：" + "\(datatypes.name)")
+                                    TextField("名前の変更", text: $name).textFieldStyle(RoundedBorderTextFieldStyle())
+                                    Text("年齢：" + "\(datatypes.age)")
+                                    TextField("年齢の変更", text: $age).textFieldStyle(RoundedBorderTextFieldStyle())
+                                    Text("日付：" + "\(datatypes.day)")
+                                    DatePicker("新しい日付を選択", selection: $day, displayedComponents: .date)
+                                        //要素の変更編ボタン
+                                        Button(action: {
+                                            let config = Realm.Configuration(schemaVersion :1)
+                                            do{
+                                                let realm = try Realm(configuration: config)
+                                                try realm.write({
+                                                    datatypes.name = self.name
+                                                    datatypes.age = self.age
+                                                    datatypes.day = self.day
+                                                    realm.add(datatypes)
+                                                    print("success")
+                                                })
+                                                
+                                            }
+                                            catch{
+                                                print(error.localizedDescription)
+                                            }
+                                            
+                                            }) {
+                                            Text("更新")
+                                            }
+                                    }.padding(20)
+                    ){
+                    //↑までは遷移画面の描写
+                    //ここからリスト表示の描写
+                    VStack{
+                    Text("\(datatypes.name)" + "　" + "\(datatypes.age)")
+                    Text("\(datatypes.day)")
+                        }}}}
                 .navigationBarTitle("ホーム", displayMode: .inline)
                 .navigationBarItems(leading: NavigationLink(destination:
+                                                                
                 //追加ボタンを押すと出てくる画面
                                 VStack{
                                 //入力するところ
-                                    TextField("name", text: $name).textFieldStyle(RoundedBorderTextFieldStyle())
-                                    TextField ("age", text: $age).textFieldStyle(RoundedBorderTextFieldStyle())
+                                    TextField("名前", text: $name).textFieldStyle(RoundedBorderTextFieldStyle())
+                                    TextField ("年齢", text: $age).textFieldStyle(RoundedBorderTextFieldStyle())
+                                    //日付を取得
+                                    DatePicker("日付を選択", selection: $day, displayedComponents: .date)
                                     
                                 //入力したのを保存するところ
                                     Button(action: {
@@ -43,6 +85,7 @@ struct ContentView: View {
                                             newdata.id = maxId + 1
                                             newdata.name = self.name
                                             newdata.age = self.age
+                                            newdata.day = self.day
                                             try realm.write({
                                                 realm.add(newdata)
                                                 print("success")
@@ -71,7 +114,7 @@ struct ContentView: View {
                                         }
                                         
                                     }) {
-                                        Text("表示")
+                                        Text("デバッグエリアに表示")
                                     }
                                 
                                 //データ全削除
@@ -96,10 +139,11 @@ struct ContentView: View {
                                     }
                 }.padding(20)){
                         Text("追加")
-                })//BarItems
+                })//BarItemsの終わりのカッコ
         }
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -113,6 +157,7 @@ class datatype :Object{
     @objc dynamic var id: Int = 0
     @objc dynamic var name = ""
     @objc dynamic var age = ""
+    @objc dynamic var day = Date()
     private static var config = Realm.Configuration(schemaVersion :1)
     private static var realm = try! Realm(configuration: config)
     //idを主キーに設定
@@ -125,13 +170,12 @@ class datatype :Object{
     }
 }
 
-//データを取得するクラス
+//データを取得しておくクラス
 class get_data : ObservableObject{
     @Published var itemEntities: Results<datatype> = datatype.all()
-    
+    //よくわからんけどここから下のずらっと書いてあるやつをコピペしたら保存した時にビューを更新してくれるようになった
     private var notificationTokens: [NotificationToken] = []
-
-    //よくわからんけど下のをコピペしたら更新してくれるようになった
+    
         init() {
             // DBに変更があったタイミングでitemEntitiesの変数に値を入れ直す
             notificationTokens.append(itemEntities.observe { change in
